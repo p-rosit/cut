@@ -5,7 +5,7 @@ continue_on_error=false
 compiler_chosen=false
 flags_chosen=false
 
-while getopts ':t:c:feh' OPTION; do
+while getopts ':t:c:aeh' OPTION; do
     case "$OPTION" in
         t)
             test_files=$OPTARG
@@ -15,7 +15,7 @@ while getopts ':t:c:feh' OPTION; do
             compiler=$OPTARG
             compiler_chosen=true
             ;;
-        f)
+        a)
             flags=$OPTARG
             flags_chosen=true
             ;;
@@ -23,14 +23,14 @@ while getopts ':t:c:feh' OPTION; do
             continue_on_error=true
             ;;
         h)
-            echo "Usage: unit_testing [-c] [-f file_names]"
+            echo "Usage: unit_testing [-e] [-c compiler] [-a compiler_args]"
             echo ""
             echo "-e        Flag for specifying continue on error. If present"
             echo "          unittesting of a file is not stopped when a test fails."
             echo ""
-            echo "-t        Any amount of paths to files to test. If no files"
-            echo "          are supplied all files under the current directory that"
-            echo "          start with 'unittest_' are compiled and tested."
+            echo "-c        The compiler to use, the default is gcc."
+            echo ""
+            echo "-a        Extra arguments for the compiler"
             exit
             ;;
     esac
