@@ -1,6 +1,10 @@
 # C Unit Testing (cut)
 
-A simple framework for unit testing in C. To use this library include the header file in your project. A unit test function can be declared in the following way
+A simple framework for unit testing in C. To use this library include the header file in your project.
+
+## Writing a test
+
+A very simple test can be written in the following way:
 
 ```c
 UNIT_TEST(function_name) {
@@ -24,3 +28,23 @@ UNIT_TESTS(
 )
 ```
 
+## Running tests
+
+To compile and run all tests in a directory one can use the bash script `unit_testing.sh`. All directories starting with "unit_tests" are assumed to only contain files to be tested, these will be compiled and run by the script. All files that match "unit_tests_*.c" are assumed to be test files which will be compiled and run.
+
+## Available macros
+
+The available assert macros are the following
+
+| Assert                                    |
+| ----------------------------------------- |
+| ASSERT_NULL(ptr, fmt, ...)                |
+| ASSERT_NOT_NULL(ptr, fmt, ...)            |
+| ASSERT_TRUE(val, fmt, ...)                |
+| ASSERT_FALSE(val, fmt, ...)               |
+| ASSERT_EQUAL(val1, val2, fmt, ...)        |
+| ASSERT_NOT_EQUAL(val1, val2, fmt, ...)    |
+
+every assert expects one (or two for equality) values as the first inputs(s). A formatting string to be printed if the test fails is the input after that and then a variable amount of arguments (even zero) can be given to the macro as input just like printf.
+
+All unit tests must end with `UNIT_TEST_END;` and if a unit tests is broken (as sometimes happens) one can write `UNIT_TEST_BROKEN;` as the first line of the test. If an entire file should be marked as broken one can define the symbol `UNIT_TEST_FILE_BROKEN` which will skip all the tests.
