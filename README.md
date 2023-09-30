@@ -32,6 +32,8 @@ UNIT_TESTS(
 
 To compile and run all tests in a directory one can use the bash script `unit_testing.sh`. All directories starting with "unit_tests" are assumed to only contain files to be tested, these will be compiled and run by the script. All files that match "unit_tests_*.c" are assumed to be test files which will be compiled and run.
 
+Tests can also be run on your own by compiling the test file and running the compiled code.
+
 ## Available macros
 
 The available assert macros are the following
