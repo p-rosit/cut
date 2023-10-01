@@ -43,7 +43,7 @@ done
 [ -z "$root_dir" ] && root_dir="*"
 [ -z "$compiler" ] && compiler=gcc
 [ -z "$compiler_args" ] && compiler_args="-Wall -Wpedantic"
-[ -n "$continue_on_fail" ] && compiler_args="$compiler_args -DUNIT_TEST_CONTINUE_ON_FAIL"
+[ -n "$continue_on_fail" ] && compiler_args="$compiler_args -DCUT_CONTINUE_ON_FAIL"
 
 [ -z "$optimization_level" ] && optimization_level="0"
 [ "$optimization_level" = all ] && run_all_optimizations=true

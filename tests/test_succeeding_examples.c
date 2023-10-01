@@ -4,56 +4,56 @@
 
 #define SMALL_SLEEP (usleep(100000))
 
-UNIT_TEST(immediate_success) {
+CUT_TEST(immediate_success) {
     SMALL_SLEEP;
 
-    UNIT_TEST_END;
+    TEST_END;
 }
 
-UNIT_TEST(assert_null) {
+CUT_TEST(assert_null) {
     SMALL_SLEEP;
 
     ASSERT_NULL(NULL, "Null pointer is not equal to null.");
-    UNIT_TEST_END;
+    TEST_END;
 }
 
-UNIT_TEST(assert_not_null) {
+CUT_TEST(assert_not_null) {
     SMALL_SLEEP;
 
     void* c = malloc(1);
     ASSERT_NOT_NULL(c, "Non null pointer is null.");
-    UNIT_TEST_END;
+    TEST_END;
 }
 
-UNIT_TEST(assert_true) {
+CUT_TEST(assert_true) {
     SMALL_SLEEP;
 
     ASSERT_TRUE(0 == 0, "0 is not equal to 0.");
-    UNIT_TEST_END;
+    TEST_END;
 }
 
-UNIT_TEST(assert_false) {
+CUT_TEST(assert_false) {
     SMALL_SLEEP;
 
     ASSERT_FALSE(0 == 1, "0 is equal to 1.");
-    UNIT_TEST_END;
+    TEST_END;
 }
 
-UNIT_TEST(assert_equal) {
+CUT_TEST(assert_equal) {
     SMALL_SLEEP;
     
     ASSERT_EQUAL(0, 0, "0 is not equal to 0.");
-    UNIT_TEST_END;
+    TEST_END;
 }
 
-UNIT_TEST(assert_not_equal) {
+CUT_TEST(assert_not_equal) {
     SMALL_SLEEP;
 
     ASSERT_NOT_EQUAL(0, 1, "0 is equal to 1.");
-    UNIT_TEST_END;
+    TEST_END;
 }
 
-UNIT_TESTS(
+LIST_TESTS(
     immediate_success,
     assert_null,
     assert_not_null,

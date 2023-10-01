@@ -1,170 +1,186 @@
-#ifndef UNIT_TEST_H
-#define UNIT_TEST_H
+#ifndef CUT_H
+#define CUT_H
 
 #include <stdio.h>
 #include <stdarg.h>
 #include <ctype.h>
 
-#define UNIT_TEST_START_SYMBOL          ('.')
-#define UNIT_TEST_SUCCESS_SYMBOL        ('-')
-#define UNIT_TEST_FAIL_SYMBOL           ('x')
+#define CUT_START_SYMBOL          ('.')
+#define CUT_SUCCESS_SYMBOL        ('-')
+#define CUT_FAIL_SYMBOL           ('x')
+#define CUT_BROKEN_SYMBOL         (' ')
 
-#define UNIT_TEST_MESSAGE_SIZE          (2048)
-#define UNIT_TEST_BAR_SIZE              (256)
-#define UNIT_TEST_FUNCTION_NAME_SIZE    (20)
-#define UNIT_TEST_LINE_NUMBER_SIZE      (3)
+#define CUT_MESSAGE_SIZE          (2048)
+#define CUT_BAR_SIZE              (256)
+#define CUT_FUNCTION_NAME_SIZE    (20)
+#define CUT_LINE_NUMBER_SIZE      (3)
 
-#define UNIT_TEST_END \
+#define TEST_END \
     do {return 1;} while (0)
-#define UNIT_TEST_BROKEN \
-    do {return 1;} while (0)
-#define UNIT_TEST_FAIL(...) \
-    do {unit_test_p_make_return_message((debug_information_t) {.function_name = __func__, .line_number = __LINE__}, __VA_ARGS__); return 0;} while(0)
-#define UNIT_TEST_BOOLEAN_CHECK(expression, ...) \
-    do {if (!(expression)) {UNIT_TEST_FAIL(__VA_ARGS__);}} while(0)
+#define TEST_BROKEN \
+    do {cutp_make_return_message(CUT_DEBUG_INFO, "Test skipped."); return 2;} while (0)
+#define TEST_FAIL(...) \
+    do {cutp_make_return_message(CUT_DEBUG_INFO, __VA_ARGS__); return 0;} while(0)
+#define CUT_BOOLEAN_CHECK(expression, ...) \
+    do {if (!(expression)) {TEST_FAIL(__VA_ARGS__);}} while(0)
 
 #define ASSERT_FALSE(bool, ...) \
-    UNIT_TEST_BOOLEAN_CHECK((bool) == 0, __VA_ARGS__)
+    CUT_BOOLEAN_CHECK((bool) == 0, __VA_ARGS__)
 #define ASSERT_TRUE(bool, ...) \
-    UNIT_TEST_BOOLEAN_CHECK((bool) != 0, __VA_ARGS__)
+    CUT_BOOLEAN_CHECK((bool) != 0, __VA_ARGS__)
 
 #define ASSERT_NULL(ptr, ...) \
-    UNIT_TEST_BOOLEAN_CHECK((ptr) == NULL, __VA_ARGS__)
+    CUT_BOOLEAN_CHECK((ptr) == NULL, __VA_ARGS__)
 #define ASSERT_NOT_NULL(ptr, ...) \
-    UNIT_TEST_BOOLEAN_CHECK((ptr) != NULL, __VA_ARGS__)
+    CUT_BOOLEAN_CHECK((ptr) != NULL, __VA_ARGS__)
 
 #define ASSERT_EQUAL(val1, val2, ...) \
-    UNIT_TEST_BOOLEAN_CHECK((val1) == (val2), __VA_ARGS__)
+    CUT_BOOLEAN_CHECK((val1) == (val2), __VA_ARGS__)
 #define ASSERT_NOT_EQUAL(val1, val2, ...) \
-    UNIT_TEST_BOOLEAN_CHECK((val1) != (val2), __VA_ARGS__)
+    CUT_BOOLEAN_CHECK((val1) != (val2), __VA_ARGS__)
 
-#ifndef UNIT_TEST_FILE_BROKEN
-#define UNIT_TESTS(...) \
+#define CUT_DEBUG_INFO \
+    ((cut_debug_information_t) {\
+        .function_name = __func__,\
+        .line_number = __LINE__\
+     })
+#define CUT_FAIL    (0)
+#define CUT_SUCCESS (1)
+#define CUT_BROKEN  (2)
+
+#ifndef CUT_FILE_BROKEN
+#define LIST_TESTS(...) \
     int main() {\
-        unit_test_p_func fs[] = {__VA_ARGS__};\
-        int total_tests = sizeof fs / sizeof(unit_test_p_func);\
-        unit_test_p_test_all_functions(total_tests, fs);\
+        cutp_func fs[] = {__VA_ARGS__};\
+        int total_tests = sizeof fs / sizeof(cutp_func);\
+        cutp_test_all_functions(total_tests, fs);\
         printf("\n");\
         return 0;\
     }
 #else
-#define UNIT_TESTS(...) \
+#define LIST_TESTS(...) \
     int main() {\
-        unit_test_p_func fs[] = {__VA_ARGS__};\
-        int total_tests = sizeof fs / sizeof(unit_test_p_func);\
-        unit_test_p_prepare_tests(total_tests);\
-        unit_test_p_finish_tests(0, total_tests);\
+        cutp_func fs[] = {__VA_ARGS__};\
+        int total_tests = sizeof fs / sizeof(cutp_func);\
+        cutp_prepare_tests(total_tests);\
+        cutp_finish_tests(0, total_tests);\
         printf(" [File marked broken]\n");\
         return 0;\
     }
 #endif
 
 char test_prefix[] = "Running tests:";
-char unit_test_p_message[UNIT_TEST_MESSAGE_SIZE];
-char unit_test_p_bar[UNIT_TEST_BAR_SIZE];
+char cutp_message[CUT_MESSAGE_SIZE];
+char cutp_bar[CUT_BAR_SIZE];
 
-typedef int (*unit_test_p_func)();
-#define UNIT_TEST(function) int function()
+typedef int (*cutp_func)();
+#define CUT_TEST(function) int function()
 
-typedef struct debug_information {
+typedef struct cut_debug_information {
     const char *function_name;
     int line_number;
-} debug_information_t;
+} cut_debug_information_t;
 
-void    unit_test_p_test_all_functions(int, unit_test_p_func*);
-int     unit_test_p_test_function(unit_test_p_func, int, int);
-void    unit_test_p_prepare_tests(int);
-void    unit_test_p_finish_tests(int, int);
-void    unit_test_p_start_test(int);
-void    unit_test_p_end_test(int, int);
+void    cutp_test_all_functions(int, cutp_func*);
+int     cutp_test_function(cutp_func, int, int);
+void    cutp_prepare_tests(int);
+void    cutp_finish_tests(int, int);
+void    cutp_start_test(int);
+void    cutp_end_test(int, int);
 
-void    unit_test_p_report_error();
-void    unit_test_p_make_return_message(debug_information_t, char*, ...);
-void    unit_test_p_error_format_string(char*, debug_information_t, char*);
+void    cutp_report_error();
+void    cutp_make_return_message(cut_debug_information_t, char*, ...);
+void    cutp_error_format_string(char*, cut_debug_information_t, char*);
 
-void    unit_test_p_make_bar(int);
-void    unit_test_p_write_to_bar(int, char);
-void    unit_test_p_print_bar();
-void    unit_test_p_clear_bar(int);
+void    cutp_make_bar(int);
+void    cutp_write_to_bar(int, char);
+void    cutp_print_bar();
+void    cutp_clear_bar(int);
 
 
-void unit_test_p_test_all_functions(int total_tests, unit_test_p_func* funcs) {
-    int index, succeeded, total_succeeded;
+void cutp_test_all_functions(int total_tests, cutp_func* funcs) {
+    int index, status, total_succeeded;
 
-    unit_test_p_prepare_tests(total_tests);
+    cutp_prepare_tests(total_tests);
 
     for (index = 0, total_succeeded = 0; index < total_tests; index++) {
-        succeeded = unit_test_p_test_function(funcs[index], index, total_tests);
+        status = cutp_test_function(funcs[index], index, total_tests);
 
-#ifndef UNIT_TEST_CONTINUE_ON_FAIL
-        if (!succeeded) {
+#ifndef CUT_CONTINUE_ON_FAIL
+        if (status == CUT_FAIL) {
             break;
         }
 #endif
 
-        total_succeeded += succeeded;
+        total_succeeded += status == CUT_SUCCESS;
     }
 
-    unit_test_p_finish_tests(total_succeeded, total_tests);
+    cutp_finish_tests(total_succeeded, total_tests);
 }
 
-void unit_test_p_prepare_tests(int total_test) {
-    unit_test_p_make_bar(total_test);
-    unit_test_p_print_bar();
+void cutp_prepare_tests(int total_test) {
+    cutp_make_bar(total_test);
+    cutp_print_bar();
 }
 
-void unit_test_p_finish_tests(int total_succeeded, int total_tests) {
-    unit_test_p_clear_bar(total_tests);
-    printf("\r[%s] => [%d/%d]", unit_test_p_bar, total_succeeded, total_tests);
+void cutp_finish_tests(int total_succeeded, int total_tests) {
+    cutp_clear_bar(total_tests);
+    printf("\r[%s] => [%d/%d]", cutp_bar, total_succeeded, total_tests);
 }
 
-int unit_test_p_test_function(unit_test_p_func func, int index, int total_tests) {
-    int succeeded;
-    unit_test_p_start_test(index);
+int cutp_test_function(cutp_func func, int index, int total_tests) {
+    int status;
+    cutp_start_test(index);
 
-    succeeded = (*func)();
+    status = (*func)();
 
-    unit_test_p_clear_bar(total_tests);
-    unit_test_p_end_test(index, succeeded);
+    cutp_clear_bar(total_tests);
+    cutp_end_test(index, status);
 
-    return succeeded;
+    return status;
 }
 
-void unit_test_p_start_test(int index) {
-    unit_test_p_write_to_bar(index, UNIT_TEST_START_SYMBOL);
-    unit_test_p_print_bar();
+void cutp_start_test(int index) {
+    cutp_write_to_bar(index, CUT_START_SYMBOL);
+    cutp_print_bar();
 }
 
-void unit_test_p_end_test(int index, int succeeded) {
-    if (succeeded) {
-        unit_test_p_write_to_bar(index, UNIT_TEST_SUCCESS_SYMBOL);
-    } else {
-        unit_test_p_report_error();
-        unit_test_p_write_to_bar(index, UNIT_TEST_FAIL_SYMBOL);
+void cutp_end_test(int index, int status) {
+    char print_symbol;
+    
+    print_symbol =
+          (status == CUT_SUCCESS)   * CUT_SUCCESS_SYMBOL
+        + (status == CUT_FAIL)      * CUT_FAIL_SYMBOL
+        + (status == CUT_BROKEN)    * CUT_BROKEN_SYMBOL;
+
+    if (status == CUT_FAIL || status == CUT_BROKEN) {
+        cutp_report_error();
     }
-    unit_test_p_print_bar();
+
+    cutp_write_to_bar(index, print_symbol);
+    cutp_print_bar();
 }
 
-void unit_test_p_report_error() {
-    printf("%s\n", unit_test_p_message);
+void cutp_report_error() {
+    printf("%s\n", cutp_message);
 }
 
-void unit_test_p_make_bar(int length) {
+void cutp_make_bar(int length) {
     for (int i = 0; i < length; i++)
-        unit_test_p_bar[i] = ' ';
-    unit_test_p_bar[length + 1] = '\0';
+        cutp_bar[i] = ' ';
+    cutp_bar[length + 1] = '\0';
 }
 
-void unit_test_p_write_to_bar(int index, char c) {
-    unit_test_p_bar[index] = c;
+void cutp_write_to_bar(int index, char c) {
+    cutp_bar[index] = c;
 }
 
-void unit_test_p_print_bar() {
-    printf("\r%s [%s]", test_prefix, unit_test_p_bar);
+void cutp_print_bar() {
+    printf("\r%s [%s]", test_prefix, cutp_bar);
     fflush(stdout);
 }
 
-void unit_test_p_clear_bar(int bar_length) {
+void cutp_clear_bar(int bar_length) {
     int space = 1;
     int bar_enclosure = 2;
     int clear_length = (sizeof test_prefix) + space + bar_enclosure + bar_length;
@@ -172,22 +188,22 @@ void unit_test_p_clear_bar(int bar_length) {
     fflush(stdout);
 }
 
-void unit_test_p_make_return_message(debug_information_t info, char *format, ...) {
-    char new_format[UNIT_TEST_MESSAGE_SIZE];
+void cutp_make_return_message(cut_debug_information_t info, char *format, ...) {
+    char new_format[CUT_MESSAGE_SIZE];
     va_list valist;
   
-    unit_test_p_error_format_string(new_format, info, format);
+    cutp_error_format_string(new_format, info, format);
 
     va_start(valist, format);
-    vsprintf(unit_test_p_message, new_format, valist);
+    vsprintf(cutp_message, new_format, valist);
     va_end(valist);
 }
 
-void unit_test_p_error_format_string(char* format, debug_information_t info, char* old_format) {
+void cutp_error_format_string(char* format, cut_debug_information_t info, char* old_format) {
     sprintf(
         format, "[%*s, line %*d] %s",
-        UNIT_TEST_FUNCTION_NAME_SIZE, info.function_name,
-        UNIT_TEST_LINE_NUMBER_SIZE, info.line_number,
+        CUT_FUNCTION_NAME_SIZE, info.function_name,
+        CUT_LINE_NUMBER_SIZE, info.line_number,
         old_format
     );
 }
