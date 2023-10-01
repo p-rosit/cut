@@ -1,7 +1,10 @@
 #! /bin/bash
 
-while getopts 'd:c:a:O:e' OPTION; do
+while getopts 'f:d:c:a:O:e' OPTION; do
     case "$OPTION" in
+        f)
+            test_file=$OPTARG
+            ;;
         d)
             root_dir=$OPTARG
             ;;
@@ -18,9 +21,11 @@ while getopts 'd:c:a:O:e' OPTION; do
             compiler_args=$OPTARG
             ;;
         ?)
-            echo "Usage: unit_testing [-d root_dir] [-e] [-c compiler] [-Olevel] [-a compiler_args]"
+            echo "Usage: unit_testing [-f file_name] [-d root_dir] [-e] [-c compiler] [-Olevel] [-a compiler_args]"
             echo ""
-            echo "-d        The root directory to search for test file and folders"
+            echo "-f        A single file to test, if present no other files are tested."
+            echo ""
+            echo "-d        The root directory to search for test files and folders"
             echo "          under. If not specified the current directory is used."
             echo ""
             echo "-e        Flag for specifying continue on fail. If present a test"
@@ -104,6 +109,21 @@ print_file_under_directory () {
 print_file () {
     echo "$(tput bold)$1$(tput sgr0)"
 }
+echo "$test_file"
+
+if [ -n "$test_file" ] ; then
+    if [ -z "$run_all_optimizations" ] ; then
+        run_test $test_file
+    else
+        for o in "0" "1" "2" "3"
+        do
+            echo "---------------------------- $(tput bold)Running test with -O$o$(tput sgr0) ----------------------------"
+            optimization_level=$o
+            run_test $test_file
+        done
+    fi
+    exit
+fi
 
 any_scattered=""
 for f in $test_files
