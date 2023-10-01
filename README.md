@@ -1,6 +1,6 @@
 # C Unit Testing (cut)
 
-A simple framework for unit testing in C. To write unit tests you only need to include `cut.h` wherever you want it. Optionally a bash script is also supplied, `run_cut.sh`, which runs all tests under a directory.
+A simple framework for unit testing in C. To write unit tests you only need to include `cut.h` wherever you want it. Optionally a bash script is also supplied, `run_cut.sh`, which runs all tests under a directory. Some flags can also be used with `run_cut.sh` such as continue on error, compiler arguments and so on.
 
 ## Writing a test
 
@@ -22,11 +22,13 @@ UNIT_TEST(function_name) {
 in the bottom of the file you must then specify which functions to run in the following way
 
 ```c
-UNIT_TESTS(
+LIST_TESTS(
     function_name,
     [other functions...]
 )
 ```
+
+If an assert fails we assume that the rest of the test function is no longer valid so the test function returns from a failed assert. If the symbol `CUT_CONTINUE_ON_FAIL` has not been define no further tests are run in that file as soon as a test fails.
 
 ## Example tests
 
@@ -34,7 +36,7 @@ Examples of tests, which double as tests for this library, can be found here [he
 
 ## Running tests
 
-By default testing is aborted if a single test fails, to continue on fail define the flag `UNITTEST_CONTINUE_ON_FAIL` either when compiling or before importing `cut.h`.
+By default testing is aborted if a single test fails, to continue on fail define the flag `CUT_CONTINUE_ON_FAIL` either when compiling or before importing `cut.h` or by using the `-e` flag with `run_cut.sh`.
 
 To compile and run all tests in a directory one can use the bash script `run_cut.sh`. All directories starting with `tests` are assumed to only contain files to be tested, these will be compiled and run by the script. All files that match `test*.c` are assumed to be test files which will be compiled and run. To see specific usage of the script run `./run_cut.sh -h`.
 
@@ -55,4 +57,20 @@ The available assert macros are the following
 
 every assert expects one (or two for equality) values as the first inputs(s). A formatting string to be printed if the test fails is the input after that and then a variable amount of arguments (even zero) can be given to the macro as input just like printf.
 
-All unit tests must end with `UNIT_TEST_END;` and if a unit tests is broken (as sometimes happens) one can write `UNIT_TEST_BROKEN;` as the first line of the test. If an entire file should be marked as broken one can define the symbol `UNIT_TEST_FILE_BROKEN` which will skip all the tests.
+The available macros for tests are:
+
+| Macro                 | Usage                                     |
+| --------------------- | ----------------------------------------- |
+| LIST_TESTS(...)       | Contains all functions to test.           |
+| UNIT_TEST(func_name)  | Declaration of a unit test.               |
+| TEST_END              | Marks the successful end of a test.       |
+| TEST_BROKEN           | Marks a test as broken.                   |
+| TEST_FAIL(fmt, ...)   | Fails a test and prints an error message. |
+| CUT_FILE_BROKEN       | Marks an entire file as broken.           |
+
+All unit tests must end with `TEST_END;` and if a unit tests is broken (as sometimes happens) one can write `TEST_BROKEN;` as (one of) the first line(s) of the test. If an entire file should be marked as broken one can define the symbol `CUT_FILE_BROKEN` which will skip all the tests.
+
+## Reserved names
+
+Other than the previous macros functions internal to the library start with `cutp_` and macros which are internal to the library start with `CUT_`.
+

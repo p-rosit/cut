@@ -4,20 +4,20 @@
 
 #define SMALL_SLEEP (usleep(100000))
 
-CUT_TEST(immediate_success) {
+UNIT_TEST(immediate_success) {
     SMALL_SLEEP;
 
     TEST_END;
 }
 
-CUT_TEST(assert_null) {
+UNIT_TEST(assert_null) {
     SMALL_SLEEP;
 
     ASSERT_NULL(NULL, "Null pointer is not equal to null.");
     TEST_END;
 }
 
-CUT_TEST(assert_not_null) {
+UNIT_TEST(assert_not_null) {
     SMALL_SLEEP;
 
     void* c = malloc(1);
@@ -25,28 +25,28 @@ CUT_TEST(assert_not_null) {
     TEST_END;
 }
 
-CUT_TEST(assert_true) {
+UNIT_TEST(assert_true) {
     SMALL_SLEEP;
 
     ASSERT_TRUE(0 == 0, "0 is not equal to 0.");
     TEST_END;
 }
 
-CUT_TEST(assert_false) {
+UNIT_TEST(assert_false) {
     SMALL_SLEEP;
 
     ASSERT_FALSE(0 == 1, "0 is equal to 1.");
     TEST_END;
 }
 
-CUT_TEST(assert_equal) {
+UNIT_TEST(assert_equal) {
     SMALL_SLEEP;
     
     ASSERT_EQUAL(0, 0, "0 is not equal to 0.");
     TEST_END;
 }
 
-CUT_TEST(assert_not_equal) {
+UNIT_TEST(assert_not_equal) {
     SMALL_SLEEP;
 
     ASSERT_NOT_EQUAL(0, 1, "0 is equal to 1.");

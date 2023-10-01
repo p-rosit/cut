@@ -16,11 +16,11 @@
 #define CUT_LINE_NUMBER_SIZE      (3)
 
 #define TEST_END \
-    do {return 1;} while (0)
+    do {return CUT_SUCCESS;} while (0)
 #define TEST_BROKEN \
-    do {cutp_make_return_message(CUT_DEBUG_INFO, "Test skipped."); return 2;} while (0)
+    do {cutp_make_return_message_var_args(CUT_DEBUG_INFO, "[Test marked broken]"); return CUT_BROKEN;} while (0)
 #define TEST_FAIL(...) \
-    do {cutp_make_return_message(CUT_DEBUG_INFO, __VA_ARGS__); return 0;} while(0)
+    do {cutp_make_return_message_var_args(CUT_DEBUG_INFO, __VA_ARGS__); return CUT_FAIL;} while(0)
 #define CUT_BOOLEAN_CHECK(expression, ...) \
     do {if (!(expression)) {TEST_FAIL(__VA_ARGS__);}} while(0)
 
@@ -51,21 +51,29 @@
 #ifndef CUT_FILE_BROKEN
 #define LIST_TESTS(...) \
     int main() {\
+        int total_tests, total_succeeded;\
+        \
         cutp_func fs[] = {__VA_ARGS__};\
-        int total_tests = sizeof fs / sizeof(cutp_func);\
-        cutp_test_all_functions(total_tests, fs);\
+        total_tests = sizeof fs / sizeof(cutp_func);\
+        \
+        total_succeeded = cutp_test_all_functions(total_tests, fs);\
         printf("\n");\
-        return 0;\
+        \
+        return total_succeeded;\
     }
 #else
 #define LIST_TESTS(...) \
     int main() {\
+        int total_tests;\
+        \
         cutp_func fs[] = {__VA_ARGS__};\
-        int total_tests = sizeof fs / sizeof(cutp_func);\
+        total_tests = sizeof fs / sizeof(cutp_func);\
+        \
         cutp_prepare_tests(total_tests);\
         cutp_finish_tests(0, total_tests);\
         printf(" [File marked broken]\n");\
-        return 0;\
+        \
+        return -1;\
     }
 #endif
 
@@ -74,22 +82,24 @@ char cutp_message[CUT_MESSAGE_SIZE];
 char cutp_bar[CUT_BAR_SIZE];
 
 typedef int (*cutp_func)();
-#define CUT_TEST(function) int function()
+#define UNIT_TEST(function) int function()
 
 typedef struct cut_debug_information {
     const char *function_name;
     int line_number;
 } cut_debug_information_t;
 
-void    cutp_test_all_functions(int, cutp_func*);
+int     cutp_test_all_functions(int, cutp_func*);
 int     cutp_test_function(cutp_func, int, int);
 void    cutp_prepare_tests(int);
 void    cutp_finish_tests(int, int);
 void    cutp_start_test(int);
 void    cutp_end_test(int, int);
 
+char    cutp_status_to_symbol(int);
 void    cutp_report_error();
-void    cutp_make_return_message(cut_debug_information_t, char*, ...);
+void    cutp_make_return_message_var_args(cut_debug_information_t, char*, ...);
+void    cutp_make_return_message(cut_debug_information_t, char*, va_list);
 void    cutp_error_format_string(char*, cut_debug_information_t, char*);
 
 void    cutp_make_bar(int);
@@ -98,7 +108,7 @@ void    cutp_print_bar();
 void    cutp_clear_bar(int);
 
 
-void cutp_test_all_functions(int total_tests, cutp_func* funcs) {
+int cutp_test_all_functions(int total_tests, cutp_func* funcs) {
     int index, status, total_succeeded;
 
     cutp_prepare_tests(total_tests);
@@ -116,6 +126,7 @@ void cutp_test_all_functions(int total_tests, cutp_func* funcs) {
     }
 
     cutp_finish_tests(total_succeeded, total_tests);
+    return total_succeeded;
 }
 
 void cutp_prepare_tests(int total_test) {
@@ -148,17 +159,25 @@ void cutp_start_test(int index) {
 void cutp_end_test(int index, int status) {
     char print_symbol;
     
-    print_symbol =
-          (status == CUT_SUCCESS)   * CUT_SUCCESS_SYMBOL
-        + (status == CUT_FAIL)      * CUT_FAIL_SYMBOL
-        + (status == CUT_BROKEN)    * CUT_BROKEN_SYMBOL;
-
     if (status == CUT_FAIL || status == CUT_BROKEN) {
         cutp_report_error();
     }
 
+    print_symbol = cutp_status_to_symbol(status);
     cutp_write_to_bar(index, print_symbol);
     cutp_print_bar();
+}
+
+char cutp_status_to_symbol(int status) {
+    switch (status) {
+        case CUT_SUCCESS:
+            return CUT_SUCCESS_SYMBOL;
+        case CUT_FAIL:
+            return CUT_FAIL_SYMBOL;
+        case CUT_BROKEN:
+            return CUT_BROKEN_SYMBOL;
+    }
+    return 'e';
 }
 
 void cutp_report_error() {
@@ -184,19 +203,23 @@ void cutp_clear_bar(int bar_length) {
     int space = 1;
     int bar_enclosure = 2;
     int clear_length = (sizeof test_prefix) + space + bar_enclosure + bar_length;
+
     printf("\r%*c\r", clear_length, ' ');
     fflush(stdout);
 }
 
-void cutp_make_return_message(cut_debug_information_t info, char *format, ...) {
-    char new_format[CUT_MESSAGE_SIZE];
+void cutp_make_return_message_var_args(cut_debug_information_t info, char* format, ...) {
     va_list valist;
-  
-    cutp_error_format_string(new_format, info, format);
 
     va_start(valist, format);
-    vsprintf(cutp_message, new_format, valist);
+    cutp_make_return_message(info, format, valist);
     va_end(valist);
+}
+
+void cutp_make_return_message(cut_debug_information_t info, char *format, va_list valist) {
+    char new_format[CUT_MESSAGE_SIZE];
+    cutp_error_format_string(new_format, info, format);
+    vsprintf(cutp_message, new_format, valist);
 }
 
 void cutp_error_format_string(char* format, cut_debug_information_t info, char* old_format) {
