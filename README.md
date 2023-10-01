@@ -2,7 +2,7 @@
 
 A simple framework for unit testing in C. To write unit tests you only need to include `cut.h` wherever you want it. Optionally a bash script is also supplied, `run_cut.sh`, which runs all tests under a directory. Some flags can also be used with `run_cut.sh` such as continue on error, compiler arguments and so on.
 
-By default the format string to an error message cannot contain more than 2047 characters and a test file cannot contain more than 512 tests. This should not be too much of a restriction since error messages are not informative at that size and one will barely be able to have any kind of overview of the tests if there are 512 of them in a single file :)
+By default the error message cannot contain more than 2047 characters and a test file cannot contain more than 512 tests. This should not be too much of a restriction since error messages are not informative at that size and one will barely be able to have any kind of overview of the tests if there are 512 of them in a single file :)
 
 ## Writing a test
 
