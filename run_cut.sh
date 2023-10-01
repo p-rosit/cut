@@ -6,7 +6,7 @@ while getopts 'd:c:a:O:e' OPTION; do
             root_dir=$OPTARG
             ;;
         e)
-            continue_on_error=true
+            continue_on_fail=true
             ;;
         c)
             compiler=$OPTARG
@@ -43,7 +43,7 @@ done
 [ -z "$root_dir" ] && root_dir="*"
 [ -z "$compiler" ] && compiler=gcc
 [ -z "$compiler_args" ] && compiler_args="-Wall -Wpedantic"
-[ -n "$continue_on_error" ] && compiler_args="$compiler_args -DUNIT_TEST_CONTINUE_ON_FAIL"
+[ -n "$continue_on_fail" ] && compiler_args="$compiler_args -DUNIT_TEST_CONTINUE_ON_FAIL"
 
 [ -z "$optimization_level" ] && optimization_level="0"
 [ "$optimization_level" = all ] && run_all_optimizations=true
@@ -120,7 +120,7 @@ echo "|                              Running unittests                          
 echo "-------------------------------------------------------------------------------"
 
 test_directories=$(find $root_dir -type d -name 'tests*')
-test_files=$(find $root_dir -type f -name 'test_*.c')
+test_files=$(find $root_dir -type f -name 'test*.c')
 
 if [ -z "$run_all_optimizations" ] ; then
     run_tests_under_directories $test_directories
