@@ -1,6 +1,6 @@
 # C Unit Testing (cut)
 
-A simple framework for unit testing in C. To use this library include the header file in your project.
+A simple framework for unit testing in C. To write unit tests you only need to include `cut.h` wherever you want it. Optionally a bash script is also supplied, `run_cut.sh`, which runs all tests under a directory.
 
 ## Writing a test
 
