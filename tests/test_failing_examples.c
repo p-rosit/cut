@@ -15,6 +15,7 @@ UNIT_TEST(immediate_fail) {
     SMALL_SLEEP;
 
     TEST_FAIL("Failed correctly.");
+    TEST_END;
 }
 
 UNIT_TEST(assert_null) {
