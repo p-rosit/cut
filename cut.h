@@ -5,12 +5,14 @@
 #include <stdarg.h>
 #include <ctype.h>
 
-#define UNIT_TEST_START_SYMBOL       ('.')
-#define UNIT_TEST_SUCCESS_SYMBOL     ('-')
-#define UNIT_TEST_FAIL_SYMBOL        ('x')
+#define UNIT_TEST_START_SYMBOL          ('.')
+#define UNIT_TEST_SUCCESS_SYMBOL        ('-')
+#define UNIT_TEST_FAIL_SYMBOL           ('x')
 
-#define UNIT_TEST_MESSAGE_SIZE       (2048)
-#define UNIT_TEST_BAR_SIZE           (256)
+#define UNIT_TEST_MESSAGE_SIZE          (2048)
+#define UNIT_TEST_BAR_SIZE              (256)
+#define UNIT_TEST_FUNCTION_NAME_SIZE    (20)
+#define UNIT_TEST_LINE_NUMBER_SIZE      (3)
 
 #define UNIT_TEST_END \
     do {return 1;} while (0)
@@ -182,7 +184,12 @@ void unit_test_p_make_return_message(debug_information_t info, char *format, ...
 }
 
 void unit_test_p_error_format_string(char* format, debug_information_t info, char* old_format) {
-    sprintf(format, "[%20s, line %3d] %s", info.function_name, info.line_number, old_format);
+    sprintf(
+        format, "[%*s, line %*d] %s",
+        UNIT_TEST_FUNCTION_NAME_SIZE, info.function_name,
+        UNIT_TEST_LINE_NUMBER_SIZE, info.line_number,
+        old_format
+    );
 }
 
 #endif

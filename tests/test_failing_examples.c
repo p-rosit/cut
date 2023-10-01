@@ -1,8 +1,8 @@
 #include "stdlib.h"
 #include "unistd.h"
-#include "../unit_test.h"
+#include "../cut.h"
 
-#define SMALL_SLEEP (usleep(200000))
+#define SMALL_SLEEP (usleep(100000))
 
 UNIT_TEST(immediate_fail) {
     SMALL_SLEEP;
