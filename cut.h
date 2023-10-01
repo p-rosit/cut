@@ -11,7 +11,7 @@
 #define CUT_BROKEN_SYMBOL         (' ')
 
 #define CUT_MESSAGE_SIZE          (2048)
-#define CUT_BAR_SIZE              (256)
+#define CUT_BAR_SIZE              (512)
 #define CUT_FUNCTION_NAME_SIZE    (20)
 #define CUT_LINE_NUMBER_SIZE      (3)
 
