@@ -28,7 +28,7 @@ LIST_TESTS(
 )
 ```
 
-If an assert fails we assume that the rest of the test function is no longer valid so the test function returns from a failed assert. If the symbol `CUT_CONTINUE_ON_FAIL` has not been define no further tests are run in that file as soon as a test fails.
+If an assert fails we assume that the rest of the test function is no longer valid so the test function returns. If a single test fails no other tests in that file are run unless the macro `CUT_CONTINUE_ON_FAIL` has been defined.
 
 ## Example tests
 
@@ -59,16 +59,16 @@ every assert expects one (or two for equality) values as the first inputs(s). A 
 
 The available macros for tests are:
 
-| Macro                 | Usage                                     |
-| --------------------- | ----------------------------------------- |
-| LIST_TESTS(...)       | Contains all functions to test.           |
-| UNIT_TEST(func_name)  | Declaration of a unit test.               |
-| TEST_END              | Marks the successful end of a test.       |
-| TEST_BROKEN           | Marks a test as broken.                   |
-| TEST_FAIL(fmt, ...)   | Fails a test and prints an error message. |
-| CUT_FILE_BROKEN       | Marks an entire file as broken.           |
+| Macro                 | Usage                                                                 |
+| --------------------- | --------------------------------------------------------------------- |
+| LIST_TESTS(...)       | Contains all functions to test.                                       |
+| UNIT_TEST(func_name)  | Declaration of a unit test.                                           |
+| TEST_END              | Marks the successful end of a test.                                   |
+| TEST_BROKEN           | Marks a test as broken.                                               |
+| TEST_FAIL(fmt, ...)   | Fails a test and prints an error message.                             |
+| CUT_FILE_BROKEN       | Marks an entire file as broken if defined before including `cut.h`    |
 
-All unit tests must end with `TEST_END;` and if a unit tests is broken (as sometimes happens) one can write `TEST_BROKEN;` as (one of) the first line(s) of the test. If an entire file should be marked as broken one can define the symbol `CUT_FILE_BROKEN` which will skip all the tests.
+All unit tests must end with `TEST_END;` and if a unit tests is broken (as sometimes happens) one can write `TEST_BROKEN;` as (one of) the first line(s) of the test. If an entire file should be marked as broken one can define the symbol `CUT_FILE_BROKEN` before including `cut.h` which will skip all the tests.
 
 ## Reserved names
 
