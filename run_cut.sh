@@ -139,7 +139,7 @@ echo "--------------------------------------------------------------------------
 echo "|                              Running unittests                              |"
 echo "-------------------------------------------------------------------------------"
 
-test_directories=$(find $root_dir -type d -name 'tests*')
+test_directories=$(find $root_dir -type d -name 'test*')
 test_files=$(find $root_dir -type f -name 'test*.c')
 
 if [ -z "$run_all_optimizations" ] ; then

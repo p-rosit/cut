@@ -40,7 +40,7 @@ Examples of tests, which double as tests for this library, can be found here [he
 
 By default testing is aborted if a single test fails, to continue on fail define the flag `CUT_CONTINUE_ON_FAIL` either when compiling or before importing `cut.h` or by using the `-e` flag with `run_cut.sh`.
 
-To compile and run all tests in a directory one can use the bash script `run_cut.sh`. All directories starting with `tests` are assumed to only contain files to be tested, these will be compiled and run by the script. All files that match `test*.c` are assumed to be test files which will be compiled and run. To see specific usage of the script run `./run_cut.sh -h`.
+To compile and run all tests in a directory one can use the bash script `run_cut.sh`. All directories that match `test*` are assumed to only contain files to be tested, these will be compiled and run by the script. All files that match `test*.c` are assumed to be test files which will be compiled and run. To see specific usage of the script run `run_cut.sh -h`.
 
 Tests can also be run on your own by compiling the test file and running the compiled code.
 
@@ -74,5 +74,5 @@ All unit tests must end with `TEST_END;` and if a unit tests is broken (as somet
 
 ## Reserved names
 
-Other than the previous macros functions internal to the library start with `cutp_` and macros which are internal to the library start with `CUT_`.
+Other than the previous macros functions and structs internal to the library start with `cutp_` and macros which are internal to the library start with `CUT_`.
 
