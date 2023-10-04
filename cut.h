@@ -77,6 +77,15 @@
     }
 #endif
 
+#define CUT_COL_RED     "\x1b[31m"
+#define CUT_COL_GREEN   "\x1b[32m"
+#define CUT_COL_YELLOW  "\x1b[33m"
+#define CUT_COL_BLUE    "\x1b[34m"
+#define CUT_COL_MAGENTA "\x1b[35m"
+#define CUT_COL_CYAN    "\x1b[36m"
+#define CUT_COL_RESET   "\x1b[0m"
+
+
 char test_prefix[] = "Running tests:";
 char cutp_message[CUT_MESSAGE_SIZE];
 char cutp_bar[CUT_BAR_SIZE];
@@ -224,7 +233,7 @@ void cutp_make_return_message(cut_debug_information_t info, char *format, va_lis
 
 void cutp_error_format_string(char* format, cut_debug_information_t info, char* old_format) {
     sprintf(
-        format, "[%*s, line %*d] %s",
+        format, CUT_COL_RED "[%*s, line %*d] %s" CUT_COL_RESET,
         CUT_FUNCTION_NAME_SIZE, info.function_name,
         CUT_LINE_NUMBER_SIZE, info.line_number,
         old_format
