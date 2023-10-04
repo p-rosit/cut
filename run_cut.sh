@@ -71,7 +71,7 @@ run_scattered_tests () {
     echo "Running scattered unit tests:"
     for f in $test_files
     do
-        file_is_under_directories $f $test_directories
+        file_is_under_directories $f "$test_directories"
 
         if [ -z "$file_exists" ] ; then
             print_file $f
@@ -128,7 +128,7 @@ fi
 any_scattered=""
 for f in $test_files
 do
-    file_is_under_directories $f $test_directories
+    file_is_under_directories $f "$test_directories"
     if [ -z "$file_exists" ] ; then
         any_scattered=true
         break
@@ -143,20 +143,20 @@ test_directories=$(find $root_dir -type d -name 'test*')
 test_files=$(find $root_dir -type f -name 'test*.c')
 
 if [ -z "$run_all_optimizations" ] ; then
-    run_tests_under_directories $test_directories
+    run_tests_under_directories "$test_directories"
 
     if [ -n "$any_scattered" ] ; then
-        run_scattered_tests $test_files
+        run_scattered_tests "$test_files"
     fi
 else
     for o in "0" "1" "2" "3"
     do
         echo "---------------------------- $(tput bold)Running tests with -O$o$(tput sgr0) ---------------------------"
         optimization_level=$o
-        run_tests_under_directories $test_directories
+        run_tests_under_directories "$test_directories"
 
         if [ -n "$any_scattered" ] ; then
-            run_scattered_tests $test_files
+            run_scattered_tests "$test_files"
         fi
     done
 fi
