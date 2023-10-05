@@ -145,7 +145,7 @@ void cutp_prepare_tests(int total_test) {
 
 void cutp_finish_tests(int total_succeeded, int total_tests) {
     cutp_clear_bar(total_tests);
-    printf("\r[%s] => [%d/%d]", cutp_bar, total_succeeded, total_tests);
+    printf("\r[%d/%d] <= [%s]", total_succeeded, total_tests, cutp_bar);
 }
 
 int cutp_test_function(cutp_func func, int index, int total_tests) {
