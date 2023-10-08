@@ -39,41 +39,41 @@
 #define ASSERT_NOT_EQUAL(val1, val2, ...) \
     CUT_BOOLEAN_CHECK((val1) != (val2), __VA_ARGS__)
 
-#define CUT_DEBUG_INFO                                                  \
-    ((cut_debug_information_t) {                                        \
-        .function_name = __func__,                                      \
-        .line_number = __LINE__                                         \
+#define CUT_DEBUG_INFO                                                          \
+    ((cut_debug_information_t) {                                                \
+        .function_name = __func__,                                              \
+        .line_number = __LINE__                                                 \
      })
 #define CUT_FAIL    (0)
 #define CUT_SUCCESS (1)
 #define CUT_BROKEN  (2)
 
 #ifndef CUT_FILE_BROKEN
-#define LIST_TESTS(...)                                                 \
-    int main() {                                                        \
-        int total_tests, total_succeeded;                               \
-                                                                        \
-        cutp_func fs[] = {__VA_ARGS__};                                 \
-        total_tests = sizeof fs / sizeof(cutp_func);                    \
-                                                                        \
-        total_succeeded = cutp_test_all_functions(total_tests, fs);     \
-        printf("\n");                                                   \
-                                                                        \
-        return total_succeeded;                                         \
+#define LIST_TESTS(...)                                                         \
+    int main() {                                                                \
+        int total_tests, total_succeeded;                                       \
+                                                                                \
+        cutp_func fs[] = {__VA_ARGS__};                                         \
+        total_tests = sizeof fs / sizeof(cutp_func);                            \
+                                                                                \
+        total_succeeded = cutp_test_all_functions(total_tests, fs);             \
+        printf("\n");                                                           \
+                                                                                \
+        return total_succeeded;                                                 \
     }
 #else
-#define LIST_TESTS(...)                                                 \
-    int main() {                                                        \
-        int total_tests;                                                \
-                                                                        \
-        cutp_func fs[] = {__VA_ARGS__};                                 \
-        total_tests = sizeof fs / sizeof(cutp_func);                    \
-                                                                        \
-        cutp_prepare_tests(total_tests);                                \
-        cutp_finish_tests(0, total_tests);                              \
-        printf(" [File marked broken]\n");                              \
-                                                                        \
-        return -1;                                                      \
+#define LIST_TESTS(...)                                                         \
+    int main() {                                                                \
+        int total_tests;                                                        \
+                                                                                \
+        cutp_func fs[] = {__VA_ARGS__};                                         \
+        total_tests = sizeof fs / sizeof(cutp_func);                            \
+                                                                                \
+        cutp_prepare_tests(total_tests);                                        \
+        cutp_finish_tests(0, total_tests);                                      \
+        printf(" [File marked broken]\n");                                      \
+                                                                                \
+        return -1;                                                              \
     }
 #endif
 
