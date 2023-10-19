@@ -18,7 +18,7 @@
 #define TEST_END \
     do {return CUT_SUCCESS;} while (0)
 #define TEST_BROKEN \
-    do {cutp_make_return_message_var_args(CUT_DEBUG_INFO, "[Test marked broken]"); return CUT_BROKEN;} while (0)
+    do {cutp_make_return_message_var_args(CUT_DEBUG_INFO, "[Test marked broken]"); cutp_broken_flag = 1; return CUT_FAIL;} while (0)
 #define TEST_FAIL(...) \
     do {cutp_make_return_message_var_args(CUT_DEBUG_INFO, __VA_ARGS__); return CUT_FAIL;} while(0)
 #define CUT_BOOLEAN_CHECK(expression, ...) \
@@ -46,7 +46,6 @@
      })
 #define CUT_FAIL    (0)
 #define CUT_SUCCESS (1)
-#define CUT_BROKEN  (2)
 
 #ifndef CUT_FILE_BROKEN
 #define LIST_TESTS(...)                                                         \
@@ -89,9 +88,11 @@
 char test_prefix[] = "Running tests:";
 char cutp_message[CUT_MESSAGE_SIZE];
 char cutp_bar[CUT_BAR_SIZE];
+char cutp_broken_flag = 0;
 
 typedef int (*cutp_func)();
 #define UNIT_TEST(function) int function()
+#define SUB_TEST(function, ...)  int function(__VA_ARGS__)
 
 typedef struct cut_debug_information {
     const char *function_name;
@@ -126,11 +127,12 @@ int cutp_test_all_functions(int total_tests, cutp_func* funcs) {
         status = cutp_test_function(funcs[index], index, total_tests);
 
 #ifndef CUT_CONTINUE_ON_FAIL
-        if (status == CUT_FAIL) {
+        if (status == CUT_FAIL && !cutp_broken_flag) {
             break;
         }
 #endif
 
+        cutp_broken_flag = 0;
         total_succeeded += status == CUT_SUCCESS;
     }
 
@@ -168,7 +170,7 @@ void cutp_start_test(int index) {
 void cutp_end_test(int index, int status) {
     char print_symbol;
     
-    if (status == CUT_FAIL || status == CUT_BROKEN) {
+    if (status == CUT_FAIL) {
         cutp_report_error();
     }
 
@@ -178,15 +180,11 @@ void cutp_end_test(int index, int status) {
 }
 
 char cutp_status_to_symbol(int status) {
-    switch (status) {
-        case CUT_SUCCESS:
-            return CUT_SUCCESS_SYMBOL;
-        case CUT_FAIL:
-            return CUT_FAIL_SYMBOL;
-        case CUT_BROKEN:
-            return CUT_BROKEN_SYMBOL;
+    if (status) {
+        return CUT_SUCCESS_SYMBOL;
+    } else {
+        return !cutp_broken_flag * CUT_FAIL_SYMBOL + cutp_broken_flag * CUT_BROKEN_SYMBOL;
     }
-    return 'e';
 }
 
 void cutp_report_error() {
@@ -219,6 +217,7 @@ void cutp_clear_bar(int bar_length) {
 
 void cutp_make_return_message_var_args(cut_debug_information_t info, char* format, ...) {
     va_list valist;
+    if (format[0] == '\0') return;
 
     va_start(valist, format);
     cutp_make_return_message(info, format, valist);
