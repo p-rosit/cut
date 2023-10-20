@@ -105,6 +105,8 @@ void    cutp_prepare_tests(int);
 void    cutp_finish_tests(int, int);
 void    cutp_start_test(int);
 void    cutp_end_test(int, int);
+void    cutp_print_finish_prefix(int, int);
+void    cutp_print_test_prefix();
 
 char    cutp_status_to_symbol(int);
 void    cutp_report_error();
@@ -142,12 +144,18 @@ int cutp_test_all_functions(int total_tests, cutp_func* funcs) {
 
 void cutp_prepare_tests(int total_test) {
     cutp_make_bar(total_test);
+    cutp_print_test_prefix();
     cutp_print_bar();
 }
 
 void cutp_finish_tests(int total_succeeded, int total_tests) {
     cutp_clear_bar(total_tests);
-    printf("\r[%d/%d] <= [%s]", total_succeeded, total_tests, cutp_bar);
+    cutp_print_finish_prefix(total_succeeded, total_tests);
+    cutp_print_bar();
+}
+
+void cutp_print_finish_prefix(int total_succeeded, int total_tests) {
+    printf("\r[%d/%d] <= ", total_succeeded, total_tests);
 }
 
 int cutp_test_function(cutp_func func, int index, int total_tests) {
@@ -164,6 +172,7 @@ int cutp_test_function(cutp_func func, int index, int total_tests) {
 
 void cutp_start_test(int index) {
     cutp_write_to_bar(index, CUT_START_SYMBOL);
+    cutp_print_test_prefix();
     cutp_print_bar();
 }
 
@@ -176,6 +185,7 @@ void cutp_end_test(int index, int status) {
 
     print_symbol = cutp_status_to_symbol(status);
     cutp_write_to_bar(index, print_symbol);
+    cutp_print_test_prefix();
     cutp_print_bar();
 }
 
@@ -201,8 +211,28 @@ void cutp_write_to_bar(int index, char c) {
     cutp_bar[index] = c;
 }
 
+void cutp_print_test_prefix() {
+    printf("\r%s: ", test_prefix);
+}
+
 void cutp_print_bar() {
-    printf("\r%s [%s]", test_prefix, cutp_bar);
+    printf("[");
+    
+    char *bar, c;
+    for (bar = cutp_bar, c = *bar++; c != '\0'; c = *bar++) {
+        switch (c) {
+            case CUT_START_SYMBOL:
+            case CUT_SUCCESS_SYMBOL:
+                printf("%c", c);
+                break;
+            case CUT_BROKEN_SYMBOL:
+            case CUT_FAIL_SYMBOL:
+                printf(CUT_COL_RED "%c" CUT_COL_RESET, c);
+                break;
+        }
+    }
+
+    printf("]");
     fflush(stdout);
 }
 
@@ -232,7 +262,7 @@ void cutp_make_return_message(cut_debug_information_t info, char *format, va_lis
 
 void cutp_error_format_string(char* format, cut_debug_information_t info, char* old_format) {
     sprintf(
-        format, CUT_COL_RED "[%*s, line %*d] %s" CUT_COL_RESET,
+        format, (CUT_COL_RED "[%*s, line %*d] %s" CUT_COL_RESET),
         CUT_FUNCTION_NAME_SIZE, info.function_name,
         CUT_LINE_NUMBER_SIZE, info.line_number,
         old_format
