@@ -62,7 +62,7 @@ UNIT_TEST(assert_not_equal) {
 }
 
 SUB_TEST(sub_test, size_t i) {
-    ASSERT_TRUE(i < 5, "Number became larger than 5.");
+    ASSERT_TRUE(i < 5, "Subtest failed correctly: Number became larger than 5.");
     TEST_END;
 }
 

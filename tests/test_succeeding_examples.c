@@ -54,7 +54,7 @@ UNIT_TEST(assert_not_equal) {
 }
 
 SUB_TEST(sub_test, size_t i) {
-    ASSERT_TRUE(i < 100, "Number too big.");
+    ASSERT_TRUE(i < 100, "Subtest failed: Number too big.");
     TEST_END;
 }
 
