@@ -1,6 +1,6 @@
 #include "stdlib.h"
 #include "unistd.h"
-#include "../cut.h"
+#include "../cut.c"
 
 #define SMALL_SLEEP (usleep(100000))
 
