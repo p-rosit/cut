@@ -5,15 +5,16 @@
 #include <stdio.h>
 #include <stdarg.h>
 #include <ctype.h>
+#include <string.h>
 
 #define CUT_MESSAGE_SIZE          (2048)
-#define CUT_FUNCTION_NAME_SIZE    (20)
+#define CUT_FUNCTION_NAME_SIZE    (25)
 #define CUT_LINE_NUMBER_SIZE      (3)
 
 #define TEST_END \
     do {return CUT_SUCCESS;} while (0)
 #define TEST_BROKEN \
-    do {CUT_MAKE_MESSAGE("[Test marked broken]"); cutp_test_info->test_result.test_broken = 1; return CUT_FAIL;} while (0)
+    do {CUT_MAKE_MESSAGE("[Test marked broken]"); return CUT_BROKEN;} while (0)
 #define TEST_FAIL(...) \
     do {CUT_MAKE_MESSAGE(__VA_ARGS__); return CUT_FAIL;} while(0)
 #define CUT_BOOLEAN_CHECK(expression, ...) \
@@ -103,18 +104,19 @@ typedef struct cutp_debug_information   cutp_debug_information_t;
 typedef int (*cutp_func)(cutp_test_information_t*);
 #define UNIT_TEST(function)         int function(cutp_test_information_t* cutp_test_info)
 #define SUB_TEST(function, ...)     int function(cutp_test_information_t* cutp_test_info, __VA_ARGS__)
-#define CALL_TEST(function, ...)                                                \
+#define CALL_TEST(function, ...) \
     do {                                                                        \
-        cutp_test_info->test_result.sub_test += 1;                              \
-        if (!function(cutp_test_info, __VA_ARGS__)) {return CUT_FAIL;}          \
-        cutp_test_info->test_result.sub_test -= 1;}                             \
-    while (0)
+        cutp_push_function_name(&cutp_test_info->test_result, __func__);        \
+        if (!function(cutp_test_info, __VA_ARGS__)) {                           \
+            return CUT_FAIL;                                                    \
+        }                                                                       \
+        cutp_pop_function_name(&cutp_test_info->test_result);                   \
+    } while (0)
 
 struct cutp_test_result {
     int index;
     int status;
-    int test_broken;
-    int sub_test;
+    char* function_stack;
     char message[CUT_MESSAGE_SIZE];
 };
 
@@ -139,10 +141,15 @@ void    cutp_end_test(cutp_test_information_t*, int);
 void    cutp_print_finish_prefix(cutp_test_information_t*);
 void    cutp_print_test_prefix();
 
+void    cutp_push_function_name(cutp_test_result_t*, const char*);
+char*   cutp_make_function_stack(int, char*, int, const char*);
+void    cutp_pop_function_name(cutp_test_result_t*);
+void    cutp_replace_function_stack(cutp_test_result_t*, char*);
+
 void    cutp_report_error(cutp_test_information_t*);
 void    cutp_make_return_message_var_args(cutp_test_information_t*, cutp_debug_information_t, char*, ...);
 void    cutp_make_return_message(cutp_test_information_t*, cutp_debug_information_t, char*, va_list);
-void    cutp_error_format_string(char*, cutp_debug_information_t, char*);
+void    cutp_error_format_string(char*, cutp_test_result_t*, cutp_debug_information_t, char*);
 
 void    cutp_make_bar(cutp_test_information_t*);
 void    cutp_write_to_bar(cutp_test_information_t*, int);
@@ -159,7 +166,7 @@ int cutp_test_all_functions(cutp_test_information_t* info, cutp_func* funcs) {
         status = cutp_test_function(info, funcs[index]);
 
 #ifndef CUT_CONTINUE_ON_FAIL
-        if (status == CUT_FAIL && !info->test_result.test_broken) {
+        if (status == CUT_FAIL) {
             break;
         }
 #endif
@@ -205,9 +212,7 @@ int cutp_test_function(cutp_test_information_t* info, cutp_func func) {
 }
 
 void cutp_start_test(cutp_test_information_t* info) {
-    info->test_result.sub_test = 0;
-    info->test_result.test_broken = 0;
-
+    info->test_result.function_stack = calloc(1, sizeof(char));
     cutp_write_to_bar(info, CUT_STARTED);
     cutp_print_test_prefix();
     cutp_print_bar(info);
@@ -218,10 +223,7 @@ void cutp_end_test(cutp_test_information_t* info, int status) {
         cutp_report_error(info);
     }
 
-    if (info->test_result.test_broken) {
-        status = CUT_BROKEN;
-    }
-
+    free(info->test_result.function_stack);
     cutp_write_to_bar(info, status);
     cutp_print_test_prefix();
     cutp_print_bar(info);
@@ -290,17 +292,69 @@ void cutp_make_return_message_var_args(cutp_test_information_t* info, cutp_debug
 
 void cutp_make_return_message(cutp_test_information_t* info, cutp_debug_information_t debug, char *format, va_list valist) {
     char new_format[CUT_MESSAGE_SIZE];
-    cutp_error_format_string(new_format, debug, format);
+    cutp_error_format_string(new_format, &info->test_result, debug, format);
     vsprintf(info->test_result.message, new_format, valist);
 }
 
-void cutp_error_format_string(char* format, cutp_debug_information_t info, char* old_format) {
+void cutp_error_format_string(char* format, cutp_test_result_t* result, cutp_debug_information_t debug, char* old_format) {
+    cutp_push_function_name(result, debug.function_name);
     sprintf(
         format, (CUT_COL_RED "[%*s, line %*d] %s" CUT_COL_RESET),
-        CUT_FUNCTION_NAME_SIZE, info.function_name,
-        CUT_LINE_NUMBER_SIZE, info.line_number,
+        CUT_FUNCTION_NAME_SIZE, result->function_stack,
+        CUT_LINE_NUMBER_SIZE, debug.line_number,
         old_format
     );
+    cutp_pop_function_name(result);
+}
+
+void cutp_push_function_name(cutp_test_result_t* result, const char* func_name) {
+    int stack_length, name_length;
+    char* function_stack;
+
+    stack_length = strlen(result->function_stack);
+    name_length = strlen(func_name);
+
+    function_stack = cutp_make_function_stack(stack_length, result->function_stack, name_length, func_name);
+
+    cutp_replace_function_stack(result, function_stack);
+}
+
+char* cutp_make_function_stack(int stack_length, char* stack, int name_length, const char* push) {
+    char* function_stack;
+
+    function_stack = malloc(stack_length + name_length + 1 + (stack_length > 0));
+    strcpy(function_stack, stack);
+    if (stack_length > 0) {
+        function_stack[stack_length] = '.';
+    }
+    strcpy(function_stack + stack_length + (stack_length > 0), push);
+
+    return function_stack;
+}
+
+void cutp_pop_function_name(cutp_test_result_t* result) {
+    int i, prev_length, stack_length;
+    char *function_stack;
+
+    for (i = 0, stack_length = 0, prev_length = 0; result->function_stack[i] != '\0'; i++) {
+        if (result->function_stack[i] == '.') {
+            prev_length = stack_length;
+            stack_length = i;
+        }
+    }
+
+    function_stack = malloc(prev_length + 1);
+    function_stack[prev_length] = '\0';
+    for (i = 0; i < prev_length; i++) {
+        function_stack[i] = result->function_stack[i];
+    }
+
+    cutp_replace_function_stack(result, function_stack);
+}
+
+void cutp_replace_function_stack(cutp_test_result_t* result, char* new_stack) {
+    free(result->function_stack);
+    result->function_stack = new_stack;
 }
 
 #endif
