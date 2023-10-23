@@ -1,6 +1,6 @@
 #include "stdlib.h"
 #include "unistd.h"
-#include "../cut.h"
+#include "../cut.c"
 
 #define SMALL_SLEEP (usleep(100000))
 
@@ -21,6 +21,7 @@ UNIT_TEST(assert_not_null) {
     SMALL_SLEEP;
 
     void* c = malloc(1);
+    free(c);
     ASSERT_NOT_NULL(c, "Non null pointer is null.");
     TEST_END;
 }
@@ -62,9 +63,7 @@ UNIT_TEST(test_of_sub_test) {
     SMALL_SLEEP;
 
     for (size_t i = 0; i < 10; i++) {
-        if (!sub_test(i)) {
-            TEST_FAIL("");
-        }
+        CALL_TEST(sub_test, i);
     }
 
     TEST_END;
