@@ -1,6 +1,6 @@
 #include "stdlib.h"
 #include "unistd.h"
-#include "../cut.c"
+#include "../cut.h"
 
 #define SMALL_SLEEP (usleep(100000))
 
@@ -77,6 +77,21 @@ UNIT_TEST(test_of_sub_test) {
     TEST_END;
 }
 
+SUB_TEST(test_b, int i) {
+    ASSERT_FALSE(1, "Failed correctly.");
+    TEST_END;
+}
+
+SUB_TEST(test_a, int i) {
+    CALL_TEST(test_b, 0);
+    TEST_END;
+}
+
+UNIT_TEST(nested) {
+    CALL_TEST(test_a, 0);
+    TEST_END;
+}
+
 LIST_TESTS(
     broken_test,
     immediate_fail,
@@ -87,5 +102,6 @@ LIST_TESTS(
     assert_equal,
     assert_not_equal,
     test_of_sub_test,
+    nested,
 )
 
