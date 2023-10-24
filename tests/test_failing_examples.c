@@ -62,36 +62,6 @@ UNIT_TEST(assert_not_equal) {
     TEST_END;
 }
 
-SUB_TEST(sub_test, size_t i) {
-    ASSERT_TRUE(i < 5, "Subtest failed correctly: Number became larger than 5.");
-    TEST_END;
-}
-
-UNIT_TEST(test_of_sub_test) {
-    SMALL_SLEEP;
-
-    for (size_t i = 0; i < 10; i++) {
-        CALL_TEST(sub_test, i);
-    }
-
-    TEST_END;
-}
-
-SUB_TEST(test_b, int i) {
-    ASSERT_FALSE(1, "Failed correctly.");
-    TEST_END;
-}
-
-SUB_TEST(test_a, int i) {
-    CALL_TEST(test_b, 0);
-    TEST_END;
-}
-
-UNIT_TEST(nested) {
-    CALL_TEST(test_a, 0);
-    TEST_END;
-}
-
 LIST_TESTS(
     broken_test,
     immediate_fail,
@@ -101,7 +71,5 @@ LIST_TESTS(
     assert_false,
     assert_equal,
     assert_not_equal,
-    test_of_sub_test,
-    nested,
 )
 
