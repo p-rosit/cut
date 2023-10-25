@@ -246,7 +246,7 @@ void cutp_write_to_bar(cutp_test_information_t* info, int status) {
 }
 
 void cutp_print_test_prefix() {
-    printf("\r%s: ", test_prefix);
+    printf("\r%s ", test_prefix);
 }
 
 void cutp_print_bar(cutp_test_information_t* info) {
@@ -337,28 +337,18 @@ char* cutp_make_function_stack(char* stack, const char* name) {
 
 void cutp_pop_function_name(cutp_test_result_t* result) {
     unsigned long stack_length;
-    char *call_stack;
-
     stack_length = cutp_previous_stack_length(result->call_stack);
-
-    call_stack = malloc(stack_length + 1);
-    call_stack[stack_length] = '\0';
-    for (unsigned long i = 0; i < stack_length; i++) {
-        call_stack[i] = result->call_stack[i];
-    }
-
-    cutp_replace_function_stack(result, call_stack);
+    result->call_stack[stack_length] = '\0';
 }
 
 unsigned long cutp_previous_stack_length(char* stack) {
-    unsigned long i, prev_length, stack_length;
-    for (i = 0, prev_length = 0, stack_length = 0; stack[i] != '\0'; i++) {
+    unsigned long i, stack_length;
+    for (i = 0, stack_length = 0; stack[i] != '\0'; i++) {
         if (stack[i] == '.') {
-            prev_length = stack_length;
             stack_length = i;
         }
     }
-    return prev_length;
+    return stack_length;
 }
 
 void cutp_replace_function_stack(cutp_test_result_t* result, char* new_stack) {
