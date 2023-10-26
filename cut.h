@@ -7,9 +7,15 @@
 #include <ctype.h>
 #include <string.h>
 
-#define CUT_MESSAGE_SIZE          (2048)
-#define CUT_FUNCTION_NAME_SIZE    (20)
-#define CUT_LINE_NUMBER_SIZE      (3)
+#ifndef CUT_MESSAGE_SIZE
+    #define CUT_MESSAGE_SIZE          (2048)
+#endif
+#ifndef CUT_FUNCTION_NAME_SIZE
+    #define CUT_FUNCTION_NAME_SIZE    (20)
+#endif
+#ifndef CUT_LINE_NUMBER_SIZE
+    #define CUT_LINE_NUMBER_SIZE      (3)
+#endif
 
 #define TEST_END \
     do {return CUT_SUCCESS;} while (0)
@@ -72,7 +78,7 @@
                                                                                 \
         cutp_prepare_tests(&info);                                              \
         cutp_finish_tests(&info);                                               \
-        printf(" [File marked broken]\n");                                      \
+        printf(CUT_COL_RED " [File marked broken]\n" CUT_COL_RESET);            \
         return -1;                                                              \
     }
 #endif

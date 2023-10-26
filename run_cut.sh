@@ -1,12 +1,9 @@
 #! /bin/bash
 
-while getopts 'f:d:c:a:O:e' OPTION; do
+while getopts 't:d:c:a:O:e' OPTION; do
     case "$OPTION" in
-        f)
-            test_file=$OPTARG
-            ;;
-        d)
-            root_dir=$OPTARG
+        t)
+            test_path=$OPTARG
             ;;
         e)
             continue_on_fail=true
@@ -21,15 +18,15 @@ while getopts 'f:d:c:a:O:e' OPTION; do
             compiler_args=$OPTARG
             ;;
         ?)
-            echo "Usage: unit_testing [-f file_name] [-d root_dir] [-e] [-c compiler] [-Olevel] [-a compiler_args]"
+            echo "Usage: unit_testing [-t path/to/test] [-e] [-c compiler] [-Olevel] [-a compiler_args]"
             echo ""
-            echo "-f        A single file to test, if present no other files are tested."
+            echo "-t        If not specified all files under the current directory matching"
+            echo "          test*.c will be tested. If a directory is specified all files"
+            echo "          under that directory matching test*.c will be tested. If a single"
+            echo "          file is specified only that file will be tested."
             echo ""
-            echo "-d        The root directory to search for test files and folders"
-            echo "          under. If not specified the current directory is used."
-            echo ""
-            echo "-e        Flag for specifying continue on fail. If present a test"
-            echo "          file will continue even if one of the test functions fail."
+            echo "-e        Flag for specifying continue on fail. If present a test file"
+            echo "          will continue even if one of the internal test functions fail."
             echo ""
             echo "-c        The compiler to use, default is gcc."
             echo ""
@@ -58,7 +55,7 @@ run_tests_under_directories () {
     for d in $1
     do
         echo "Running unit tests under: $(tput bold)$d$(tput sgr0)"
-        for f in $(find $d -type f -name '*.c')
+        for f in $(find $d -type f -name 'test*.c')
         do
             print_file_under_directory $d $f
             run_test $f
@@ -102,16 +99,32 @@ file_is_under_directories () {
 }
 
 print_file_under_directory () {
-    local file_name=$(echo "$2" | sed -e "s:^$1/::")
+    # Remove prefix path and potential "/"
+    local file_name=$(echo "$2" | sed "s:^${1}::" | sed "s:^/::")
     print_file $file_name
 }
 
 print_file () {
     echo "$(tput bold)$1$(tput sgr0)"
 }
-echo "$test_file"
+
+if [[ -z "$test_path" ]]; then
+    test_path="."
+fi
+
+if [[ ! -e $test_path ]]; then
+    echo "Error:" $test_path "is not a file or directory."
+    exit
+fi
+
+if [[ -f $test_path ]]; then
+    test_file=$test_path
+else
+    root_dir=$test_path
+fi
 
 if [ -n "$test_file" ] ; then
+    echo "Compiling and running" $test_file
     if [ -z "$run_all_optimizations" ] ; then
         run_test $test_file
     else
