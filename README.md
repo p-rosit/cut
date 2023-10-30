@@ -32,9 +32,15 @@ LIST_TESTS(
 
 If an assert fails we assume that the rest of the test function is no longer valid so the test function returns. If a single test fails no other tests in that file are run unless the macro `CUT_CONTINUE_ON_FAIL` has been defined.
 
+One can also define sub tests which are tests that can be called from another test, any amount of sub tests can be nested but if a single one fails the call stack is printed as the function name. Sub tests can do anything a normal test can, expect be listed in `LIST_TESTS(...)` since it assumes those functions have been declared with `UNIT_TEST(name)`.
+
 ## Example tests
 
 Examples of tests, which double as tests for this library, can be found here [here](https://github.com/p-rosit/cut/blob/main/tests/test_succeeding_examples.c) for tests that should succeed and [here](https://github.com/p-rosit/cut/blob/main/tests/test_failing_examples.c) for tests that should fail.
+
+Additionally one can define sub tests which can take input, an example of this can be found [here](https://github.com/p-rosit/cut/blob/main/tests/test_sub_tests.c).
+
+To run these tests one can navigate to `/cut` and run `./run_cut.sh` to see the testing output.
 
 ## Running tests
 
@@ -61,14 +67,16 @@ every assert expects one (or two for equality) values as the first inputs(s). A 
 
 The available macros for tests are:
 
-| Macro                 | Usage                                                                 |
-| --------------------- | --------------------------------------------------------------------- |
-| LIST_TESTS(...)       | Contains all functions to test.                                       |
-| UNIT_TEST(func_name)  | Declaration of a unit test.                                           |
-| TEST_END              | Marks the successful end of a test.                                   |
-| TEST_BROKEN           | Marks a test as broken.                                               |
-| TEST_FAIL(fmt, ...)   | Fails a test and prints an error message.                             |
-| CUT_FILE_BROKEN       | Marks an entire file as broken if defined before including `cut.h`    |
+| Macro                     | Usage                                                                         |
+| ------------------------- | ----------------------------------------------------------------------------- |
+| LIST_TESTS(...)           | Contains all functions to test.                                               |
+| UNIT_TEST(func_name)      | Declaration of a unit test.                                                   |
+| SUB_TEST(func_name, ...)  | Declaration of sub tests, variable arguments are arguments to the function.   |
+| CALL_TEST(func_name, ...) | Sub test call, variable arguments are arguments to the function call.         |
+| TEST_END                  | Marks the successful end of a test.                                           |
+| TEST_BROKEN               | Marks a test as broken.                                                       |
+| TEST_FAIL(fmt, ...)       | Fails a test and prints an error message.                                     |
+| CUT_FILE_BROKEN           | Marks an entire file as broken if defined before including `cut.h`            |
 
 All unit tests must end with `TEST_END;` and if a unit tests is broken (as sometimes happens) one can write `TEST_BROKEN;` as (one of) the first line(s) of the test. If an entire file should be marked as broken one can define the symbol `CUT_FILE_BROKEN` before including `cut.h` which will skip all the tests.
 
