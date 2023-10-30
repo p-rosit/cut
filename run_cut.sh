@@ -1,6 +1,6 @@
 #! /bin/bash
 
-while getopts 't:d:c:a:O:e' OPTION; do
+while getopts 't:d:c:a:O:eh' OPTION; do
     case "$OPTION" in
         t)
             test_path=$OPTARG
@@ -16,6 +16,28 @@ while getopts 't:d:c:a:O:e' OPTION; do
             ;;
         a)  
             compiler_args=$OPTARG
+            ;;
+        h)
+            echo "Usage: unit_testing [-t path/to/test] [-e] [-c compiler] [-Olevel] [-a compiler_args]"
+            echo ""
+            echo "-t        If not specified all files under the current directory matching"
+            echo "          test*.c will be tested. If a directory is specified all files"
+            echo "          under that directory matching test*.c will be tested. If a single"
+            echo "          file is specified only that file will be tested."
+            echo ""
+            echo "-e        Flag for specifying continue on fail. If present a test file"
+            echo "          will continue even if one of the internal test functions fail."
+            echo ""
+            echo "-c        The compiler to use, default is gcc."
+            echo ""
+            echo "-O        The optimization level that is sent to the compiler. As an"
+            echo "          extra convenience. If '-Oall' is given the tests are run for"
+            echo "          all levels of optimization. By default test are run without"
+            echo "          any optimization."
+            echo ""
+            echo "-a        Compiler arguments, for example any linking that is needed,"
+            echo "          address sanitizing or anything else."
+            exit
             ;;
         ?)
             echo "Usage: unit_testing [-t path/to/test] [-e] [-c compiler] [-Olevel] [-a compiler_args]"
